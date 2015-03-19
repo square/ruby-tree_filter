@@ -51,13 +51,12 @@ required. This can defer resource lookups, and also allows cyclic structures!
 data = { 'name' => 'don', }
 
 data['contact'] = TreeFilter::Leaf.new(
-    '/contact-data/1',
-    TreeFilter::Defer.new(->{{
-      'email' => 'don@example.com',
-      'person' => TreeFilter::Leaf.new('/person/1', data)
-    }})
-  )
-}
+  '/contact-data/1',
+  TreeFilter::Defer.new(->{{
+    'email' => 'don@example.com',
+    'person' => TreeFilter::Leaf.new('/person/1', data)
+  }})
+)
 
 TreeFilter.new("contact[person[contact[email]]]").filter(data)
 # => {'contact' => {'person' => {'contact' => {'email' => 'don@example.com'}}}}
