@@ -1,10 +1,20 @@
 require 'json'
 
+require 'simplecov'
+SimpleCov.minimum_coverage 100
+SimpleCov.start
+
 require 'tree_filter'
 
 describe 'Tree filter spec:' do
   def filter(data, input)
     TreeFilter.new(input).filter(data)
+  end
+
+  describe 'inspecting' do
+    it 'is readable' do
+      expect(TreeFilter.new("*").inspect).to include("<TreeFilter")
+    end
   end
 
   describe 'filtering a hash' do

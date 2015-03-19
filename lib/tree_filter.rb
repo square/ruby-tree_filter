@@ -86,10 +86,6 @@ class TreeFilter
   end
 
   Slice = Struct.new(:attrs) do
-    def inspect
-      "<Slice #{@attrs.inspect}>"
-    end
-
     def initialize(attrs = {})
       super
       @attrs = attrs
@@ -115,16 +111,7 @@ class TreeFilter
         slices.each_with_object({}) do |(attr, slice), ret|
           slice ||= NullSlice.new
 
-          val = value[attr]
-
-          filtered = case val
-          when Array
-            val.map {|x| slice.filter(x) }
-          else
-            slice.filter(val)
-          end
-
-          ret[attr] = filtered
+          ret[attr] = slice.filter(value[attr])
         end
       when Array
         value.map {|x| filter(x) }
