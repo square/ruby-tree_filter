@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    tree_filter (1.0.0)
+    tree_filter (1.0.1)
 
 GEM
   remote: https://rubygems.org/
