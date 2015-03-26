@@ -22,6 +22,6 @@ Gem::Specification.new do |gem|
   gem.name          = "tree_filter"
   gem.require_paths = ["lib"]
   gem.license       = "Apache 2.0"
-  gem.version       = '1.0.0'
+  gem.version       = '1.0.1'
   gem.has_rdoc      = false
 end

@@ -54,12 +54,48 @@ describe 'Tree filter spec:' do
       expect(filter(data, 'a')).to eq('a' => 1)
     end
 
-    it 'filters defered evaluations' do
+    it 'filters deferred evaluations' do
       data = {
         'a' => TreeFilter::Defer.new(->{{'b' => 1, 'c' => 2}}),
       }
 
       expect(filter(data, 'a[b]')).to eq('a' => {'b' => 1})
+    end
+
+    it 'expands leafs in defers' do
+      data = {
+        'a' => TreeFilter::Defer.new(->{
+          TreeFilter::Leaf.new('/a', {'b' => 1, 'c' => 2})
+        }),
+      }
+
+      expect(filter(data, 'a[b]')).to eq('a' => {'b' => 1})
+      expect(filter(data, 'a')).to eq('a' => '/a')
+      expect(filter(data, '*')).to eq('a' => '/a')
+    end
+
+    it 'expands leafs in deferred arrays' do
+      data = {
+        'a' => TreeFilter::Defer.new(->{[
+          TreeFilter::Leaf.new('/a', {'b' => 1, 'c' => 2})
+        ]}),
+      }
+
+      expect(filter(data, 'a[b]')).to eq('a' => [{'b' => 1}])
+      expect(filter(data, 'a')).to eq('a' => ['/a'])
+      expect(filter(data, '*')).to eq('a' => ['/a'])
+    end
+
+    it 'expands leafs in deferred hashes' do
+      data = {
+        'a' => TreeFilter::Defer.new(->{{
+          'b' => TreeFilter::Leaf.new('/b', {'c' => 2})
+        }}),
+      }
+
+      expect(filter(data, 'a[b[*]]')).to eq('a' => {'b' => {'c' => 2}})
+      expect(filter(data, 'a')).to eq('a' => {'b' => '/b'})
+      expect(filter(data, 'a[*]')).to eq('a' => {'b' => '/b'})
     end
 
     it 'allows cyclic references with defer' do
@@ -82,6 +118,28 @@ describe 'Tree filter spec:' do
 
       expect(filter(data, 'a')).to eq('a' => '/a')
       expect(filter(data, 'a[id]')).to eq('a' => {'id' => 'a'})
+    end
+
+    it 'allows leaf alternation in an array' do
+      data = {'a' => [TreeFilter::Leaf.new('/a', 'id' => 'a', 'name' => 'b')]}
+
+      expect(filter(data, 'a')).to eq('a' => ['/a'])
+      expect(filter(data, 'a[id]')).to eq('a' => [{'id' => 'a'}])
+    end
+
+    it 'allows leaf alternation in a hash' do
+      data = {'a' => {
+        'b' => TreeFilter::Leaf.new('/b', 'id' => 'b', 'name' => 'b')
+      }}
+
+      expect(filter(data, 'a')).to eq('a' => {'b' => '/b'})
+      expect(filter(data, 'a[b]')).to eq('a' => {'b' => '/b'})
+      expect(filter(data, 'a[*]')).to eq('a' => {'b' => '/b'})
+      expect(filter(data, 'a[b[id]]')).to eq('a' => {'b' => {'id' => 'b'}})
+      expect(filter(data, 'a[b[*]]')).to eq('a' => {'b' => {
+        'id' => 'b',
+        'name' => 'b'
+      }})
     end
 
     it 'allows recursive leaf alternation' do

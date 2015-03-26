@@ -75,10 +75,16 @@ class TreeFilter
   class NullSlice
     def filter(x)
       case x
-      when Leaf
-        filter(x.left)
+      when Hash
+        x.each_with_object({}) do |(k, v), h|
+          h[k] = filter(v)
+        end
+      when Array
+        x.map {|y| filter(y) }
       when Defer
         filter(x.call)
+      when Leaf
+        filter(x.left)
       else
         x
       end
